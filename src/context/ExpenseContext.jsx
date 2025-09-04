@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+/*import { createContext, useContext, useEffect, useReducer } from "react";
 
 const ExpenseContext = createContext();
 
@@ -77,5 +77,39 @@ export const useExpenses = () => {
   if (context === undefined) {
     throw new Error("useExpenses must be used within an ExpenseProvider");
   }
+  return context;
+};*/
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+const ExpenseContext = createContext();
+
+export const ExpenseProvider = ({ username, children }) => {
+  const [expenses, setExpenses] = useState([]);
+
+  const fetchExpenses = async () => {
+    if (username) {
+      const res = await fetch(`http://localhost:5000/expenses?username=${username}`);
+      const data = await res.json();
+      setExpenses(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [username]);
+
+  // Call this after adding a new expense
+  const refreshExpenses = () => fetchExpenses();
+
+  return (
+    <ExpenseContext.Provider value={{ expenses, refreshExpenses }}>
+      {children}
+    </ExpenseContext.Provider>
+  );
+};
+
+export const useExpenses = () => {
+  const context = useContext(ExpenseContext);
+  if (!context) throw new Error("useExpenses must be used within an ExpenseProvider");
   return context;
 };

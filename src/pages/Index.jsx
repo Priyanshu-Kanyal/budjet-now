@@ -1,15 +1,20 @@
 import React from "react";
 import { ExpenseProvider } from "../context/ExpenseContext";
-import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../components/Dashboard";
-
-const Index = () => {
+import Header from "../components/Header";
+const Index = ({ username }) => {
+  if (!username) return <div>Please log in.</div>;
   return (
-    <ExpenseProvider>
-      <DashboardLayout>
-        <Dashboard />
-      </DashboardLayout>
-    </ExpenseProvider>
+    // Changed "flex align-middle" to "flex flex-col"
+    <div className="flex flex-col">
+      <Header />
+      <main className="main-content">
+        <ExpenseProvider username={username}>
+          <Dashboard username={username} />
+        </ExpenseProvider>
+      </main>
+
+    </div>
   );
 };
 

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useExpenses } from "../context/ExpenseContext";
 import toast from "react-hot-toast";
+import { Trash2 } from "lucide-react";
 import {
   formatCurrency,
   formatDate,
   getCategoryTextColor,
 } from "../utils/expenses";
-import { Trash2 } from "lucide-react";
 
-const ExpenseList = () => {
-  const { expenses, deleteExpense } = useExpenses();
+const ExpenseList = ({ username }) => {
+  const { expenses, refreshExpenses } = useExpenses();
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const categoryOptions = [
@@ -30,9 +30,21 @@ const ExpenseList = () => {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  const handleDelete = (id) => {
-    deleteExpense(id);
-    toast.success("Expense deleted successfully");
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/expenses/${username}/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Expense deleted");
+        refreshExpenses();
+      } else {
+        toast.error("Failed to delete expense");
+      }
+    } catch {
+      toast.error("Failed to delete expense");
+    }
   };
 
   return (
@@ -46,6 +58,7 @@ const ExpenseList = () => {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-3 py-1 rounded-md border bg-white border-gray-300 focus:outline-none focus:ring-2 focus:ring-expense-light focus:border-transparent"
         >
+          <option value="all">All Categories</option>
           {categoryOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -67,44 +80,16 @@ const ExpenseList = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Date
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Description
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Category
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Amount
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Action
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {sortedExpenses.map((expense) => (
-                  <tr
-                    key={expense.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
+                  <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {formatDate(expense.date)}
                     </td>
@@ -112,19 +97,13 @@ const ExpenseList = () => {
                       {expense.description}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`${getCategoryTextColor(
-                          expense.category
-                        )} font-medium`}
-                      >
-                        {expense.category.charAt(0).toUpperCase() +
-                          expense.category.slice(1)}
+                      <span className={`${getCategoryTextColor(expense.category)} font-medium`}>
+                        {expense.category.charAt(0).toUpperCase() + expense.category.slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">
                       {formatCurrency(expense.amount)}
                     </td>
-
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => handleDelete(expense.id)}

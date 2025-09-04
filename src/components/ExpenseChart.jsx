@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useExpenses } from "../context/ExpenseContext";
-import { getChartData, getExpensesByMonth } from "../utils/expenses";
+import { getExpensesByMonth } from "../utils/expenses";
 import { BarChart, PieChart } from "lucide-react";
 import ExpensePieChart from "./ExpensePieChart";
 import ExpenseBarChart from "./ExpenseBarChart";
@@ -9,7 +9,20 @@ const ExpenseChart = () => {
   const { expenses } = useExpenses();
   const [chartType, setChartType] = useState("pie");
 
-  const chartData = getChartData(expenses);
+  // Transform expenses for pie chart: group by category and sum amounts
+  const chartData = [];
+  const categoryTotals = {};
+
+  expenses.forEach(exp => {
+    const cat = exp.category || "Other";
+    categoryTotals[cat] = (categoryTotals[cat] || 0) + Number(exp.amount);
+  });
+
+  for (const [name, value] of Object.entries(categoryTotals)) {
+    chartData.push({ name, value });
+  }
+
+  // Monthly data for bar chart (keep your existing logic)
   const monthlyData = getExpensesByMonth(expenses);
 
   if (expenses.length === 0) {

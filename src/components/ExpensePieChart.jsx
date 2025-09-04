@@ -9,13 +9,18 @@ import {
 } from "recharts";
 
 const CATEGORY_COLORS = {
-  Food: "#6366F1", // Indigo-500 - Softer indigo
-  Transport: "#06B6D4", // Cyan-500 - Fresh cyan
-  Entertainment: "#A855F7", // Purple-500 - Vibrant purple
-  Utilities: "#14B8A6", // Teal-500 - Refreshing teal
-  Health: "#22C55E", // Green-500 - Natural green
-  Shopping: "#F97316", // Orange-500 - Warm orange
-  Other: "#64748B", // Slate-500 - Neutral slate
+  food: "#6366F1",
+  transport: "#06B6D4",
+  entertainment: "#A855F7",
+  utilities: "#14B8A6",
+  health: "#22C55E",
+  shopping: "#F97316",
+  other: "#64748B",
+};
+
+const getColor = (name) => {
+  // Normalize to lowercase for matching
+  return CATEGORY_COLORS[name?.toLowerCase()] || "#8E9196";
 };
 
 const ExpensePieChart = ({ data }) => {
